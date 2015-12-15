@@ -22,7 +22,7 @@ public class TerminateNodesTest {
 
     @Test
     public void destroy() {
-        JCloudsCloud cloud = spy(new JCloudsCloud("stub", null, null, null, 0, 0, 0, 0, null, null, false));
+        JCloudsCloud cloud = spy(new JCloudsCloud("stub", null, null, null, null, null, 0, 0, 0, 0, null, null, false));
         j.jenkins.clouds.add(cloud);
 
         Openstack os = mock(Openstack.class, RETURNS_SMART_NULLS);

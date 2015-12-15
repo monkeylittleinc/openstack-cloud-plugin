@@ -12,10 +12,16 @@
     <f:entry title="Password" field="credential">
         <f:password/>
     </f:entry>
+    <f:entry title="Project" field="project">
+        <f:textbox/>
+    </f:entry>
+    <f:entry title="Domain" field="domain">
+        <f:textbox/>
+    </f:entry>
     <f:entry title="Default Openstack Region" field="zone">
         <f:textbox/>
     </f:entry>
-    <f:validateButton title="Test Connection" progress="${%Testing...}" method="testConnection" with="zone,endPointUrl,identity,credential"/>
+    <f:validateButton title="Test Connection" progress="${%Testing...}" method="testConnection" with="zone,endPointUrl,identity,credential,project,domain"/>
     <f:advanced>
         <f:entry title="Max. No. of Instances" field="instanceCap">
             <f:textbox default="10" />

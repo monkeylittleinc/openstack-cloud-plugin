@@ -283,6 +283,8 @@ public class JCloudsSlaveTemplate implements Describable<JCloudsSlaveTemplate>, 
                                                   @RelativePath("..") @QueryParameter String endPointUrl,
                                                   @RelativePath("..") @QueryParameter String identity,
                                                   @RelativePath("..") @QueryParameter String credential,
+                                                  @RelativePath("..") @QueryParameter String project,
+                                                  @RelativePath("..") @QueryParameter String domain,
                                                   @RelativePath("..") @QueryParameter String zone
         ) {
 
@@ -290,7 +292,7 @@ public class JCloudsSlaveTemplate implements Describable<JCloudsSlaveTemplate>, 
             m.add("None specified", "");
 
             try {
-                final Openstack openstack = JCloudsCloud.getOpenstack(endPointUrl, identity, credential, zone);
+                final Openstack openstack = JCloudsCloud.getOpenstack(endPointUrl, identity, credential, project, domain, zone);
                 for (Flavor flavor : openstack.getSortedFlavors()) {
                     m.add(String.format("%s (%s)", flavor.getName(), flavor.getId()), flavor.getId());
                 }
@@ -313,6 +315,8 @@ public class JCloudsSlaveTemplate implements Describable<JCloudsSlaveTemplate>, 
                                                @RelativePath("..") @QueryParameter String endPointUrl,
                                                @RelativePath("..") @QueryParameter String identity,
                                                @RelativePath("..") @QueryParameter String credential,
+                                               @RelativePath("..") @QueryParameter String project,
+                                               @RelativePath("..") @QueryParameter String domain,
                                                @RelativePath("..") @QueryParameter String zone
         ) {
 
@@ -320,7 +324,7 @@ public class JCloudsSlaveTemplate implements Describable<JCloudsSlaveTemplate>, 
             m.add("None specified", "");
 
             try {
-                final Openstack openstack = JCloudsCloud.getOpenstack(endPointUrl, identity, credential, zone);
+                final Openstack openstack = JCloudsCloud.getOpenstack(endPointUrl, identity, credential, project, domain, zone);
                 for (Image image : openstack.getSortedImages()) {
                     m.add(String.format("%s (%s)", image.getName(), image.getId()), image.getId());
                 }
@@ -343,6 +347,8 @@ public class JCloudsSlaveTemplate implements Describable<JCloudsSlaveTemplate>, 
                                                  @RelativePath("..") @QueryParameter String endPointUrl,
                                                  @RelativePath("..") @QueryParameter String identity,
                                                  @RelativePath("..") @QueryParameter String credential,
+                                                 @RelativePath("..") @QueryParameter String project,
+                                                 @RelativePath("..") @QueryParameter String domain,
                                                  @RelativePath("..") @QueryParameter String zone
         ) {
 
@@ -350,7 +356,7 @@ public class JCloudsSlaveTemplate implements Describable<JCloudsSlaveTemplate>, 
             m.add("None specified", "");
 
             try {
-                Openstack openstack = JCloudsCloud.getOpenstack(endPointUrl, identity, credential, zone);
+                Openstack openstack = JCloudsCloud.getOpenstack(endPointUrl, identity, credential, project, domain, zone);
                 for (org.openstack4j.model.network.Network network: openstack.getSortedNetworks()) {
                     m.add(String.format("%s (%s)", network.getName(), network.getId()), network.getId());
                 }

@@ -39,6 +39,7 @@ import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.openstack4j.api.OSClient;
 import org.openstack4j.api.compute.ComputeFloatingIPService;
+import org.openstack4j.model.common.Identifier;
 import org.openstack4j.model.compute.ActionResponse;
 import org.openstack4j.model.compute.Address;
 import org.openstack4j.model.compute.Flavor;
@@ -74,17 +75,13 @@ public class Openstack {
 
     private final OSClient client;
 
-    public Openstack(@Nonnull String endPointUrl, @Nonnull String identity, @Nonnull Secret credential, @CheckForNull String region) {
-        // TODO refactor to split username:tenant everywhere including UI
-        String[] id = identity.split(":", 2);
-        String username = id.length > 0 ? id[0] : "";
-        String tenant = id.length > 1 ? id[1] : "";
-        client = OSFactory.builder().endpoint(endPointUrl)
-                .credentials(username, credential.getPlainText())
-                .tenantName(tenant)
+    public Openstack(@Nonnull String endPointUrl, @Nonnull String identity, @Nonnull Secret credential,
+                     @Nonnull String project, @Nonnull String domain, @CheckForNull String region) {
+        client = OSFactory.builderV3().endpoint(endPointUrl)
+                .credentials(identity, credential.getPlainText(), Identifier.byName(domain))
+                .scopeToProject(Identifier.byName(project), Identifier.byName(domain))
                 .authenticate()
-                .useRegion(region)
-        ;
+                .useRegion(region);
     }
 
     public @Nonnull List<? extends Network> getSortedNetworks() {
