@@ -75,10 +75,11 @@ public class Openstack {
 
     private final OSClient client;
 
-    public Openstack(@Nonnull String endPointUrl, @Nonnull String identity, @Nonnull Secret credential, @CheckForNull String region) {
+    public Openstack(@Nonnull String endPointUrl, @Nonnull String identity, @Nonnull Secret credential,
+                     @Nonnull String project, @Nonnull String domain, @CheckForNull String region) {
         client = OSFactory.builderV3().endpoint(endPointUrl)
-                .credentials(identity, credential.getPlainText(), Identifier.byName("AD"))
-                .scopeToProject(Identifier.byName("de"), Identifier.byName("AD"))
+                .credentials(identity, credential.getPlainText(), Identifier.byName(domain))
+                .scopeToProject(Identifier.byName(project), Identifier.byName(domain))
                 .authenticate()
                 .useRegion(region);
     }

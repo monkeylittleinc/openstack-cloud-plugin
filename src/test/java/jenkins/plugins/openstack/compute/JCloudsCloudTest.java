@@ -31,21 +31,26 @@ public class JCloudsCloudTest {
         DescriptorImpl desc = j.jenkins.getDescriptorByType(JCloudsCloud.DescriptorImpl.class);
         FormValidation v;
 
-        v = desc.doTestConnection("REGION", null, "a:b", "passwd");
+        v = desc.doTestConnection("REGION", null, "user", "passwd", "project", "domain");
         assertEquals("Endpoint URL is required", FormValidation.Kind.ERROR, v.kind);
 
-        v = desc.doTestConnection("REGION", "https://example.com", null, "passwd");
+        v = desc.doTestConnection("REGION", "https://example.com", null, "passwd", "project", "domain");
         assertEquals("Identity is required", FormValidation.Kind.ERROR, v.kind);
 
-        v = desc.doTestConnection("REGION", "https://example.com", "a:b", null);
+        v = desc.doTestConnection("REGION", "https://example.com", "user", null, "project", "domain");
         assertEquals("Credential is required", FormValidation.Kind.ERROR, v.kind);
+
+        v = desc.doTestConnection("REGION", "https://example.com", "user", "password", null, "domain");
+        assertEquals("Project is required", FormValidation.Kind.ERROR, v.kind);
+
+        v = desc.doTestConnection("REGION", "https://example.com", "user", "password", "project", null);
+        assertEquals("Domin is required", FormValidation.Kind.ERROR, v.kind);
     }
 
     @Test
     public void failtoTestConnection() throws Exception {
         FormValidation validation = j.jenkins.getDescriptorByType(JCloudsCloud.DescriptorImpl.class)
-                .doTestConnection(null, "https://example.com", "a", "a:b")
-        ;
+                .doTestConnection(null, "https://example.com", "user", "password", "project", "domain");
 
         assertEquals(FormValidation.Kind.ERROR, validation.kind);
         assertThat(validation.getMessage(), containsString("Cannot connect to specified cloud"));
@@ -81,8 +86,9 @@ public class JCloudsCloudTest {
     @Test
     public void testConfigRoundtrip() throws Exception {
 
-        JCloudsCloud original = new JCloudsCloud("openstack-profile", "identity", "credential", "endPointUrl", 1, DEFAULT_INSTANCE_RETENTION_TIME_IN_MINUTES,
-                600 * 1000, 600 * 1000, null, Collections.<JCloudsSlaveTemplate>emptyList(), true);
+        JCloudsCloud original = new JCloudsCloud("openstack-profile", "identity", "credential", "endPointUrl",
+                "project", "domain", 1, DEFAULT_INSTANCE_RETENTION_TIME_IN_MINUTES, 600 * 1000, 600 * 1000, null,
+                Collections.<JCloudsSlaveTemplate>emptyList(), true);
 
         j.getInstance().clouds.add(original);
         j.submit(j.createWebClient().goTo("configure").getFormByName("config"));

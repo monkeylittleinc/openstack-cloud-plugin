@@ -50,6 +50,8 @@ public class JCloudsCloud extends Cloud {
     public final String identity;
     public final Secret credential;
     public final String endPointUrl;
+    public final String project;
+    public final String domain;
     public final String profile;
     private final int retentionTime;
     public final int instanceCap;
@@ -78,15 +80,18 @@ public class JCloudsCloud extends Cloud {
     }
 
     @DataBoundConstructor @Restricted(DoNotUse.class)
-    public JCloudsCloud(final String profile, final String identity, final String credential, final String endPointUrl, final int instanceCap,
-                        final int retentionTime, final int scriptTimeout, final int startTimeout, final String zone, final List<JCloudsSlaveTemplate> templates,
-                        final boolean floatingIps
+    public JCloudsCloud(final String profile, final String identity, final String credential, final String endPointUrl,
+                        final String project, final String domain, final int instanceCap, final int retentionTime,
+                        final int scriptTimeout, final int startTimeout, final String zone,
+                        final List<JCloudsSlaveTemplate> templates, final boolean floatingIps
     ) {
         super(Util.fixEmptyAndTrim(profile));
         this.profile = Util.fixEmptyAndTrim(profile);
         this.identity = Util.fixEmptyAndTrim(identity);
         this.credential = Secret.fromString(credential);
         this.endPointUrl = Util.fixEmptyAndTrim(endPointUrl);
+        this.project = Util.fixEmptyAndTrim(project);
+        this.domain = Util.fixEmptyAndTrim(domain);
         this.instanceCap = instanceCap;
         this.retentionTime = retentionTime;
         this.scriptTimeout = scriptTimeout;
@@ -116,17 +121,19 @@ public class JCloudsCloud extends Cloud {
     }
 
     @Restricted(NoExternalUse.class)
-    public static @Nonnull Openstack getOpenstack(String endPointUrl, String identity, String credential, @CheckForNull String region) throws FormValidation {
+    public static @Nonnull Openstack getOpenstack(String endPointUrl, String identity, String credential, String project, String domain, @CheckForNull String region) throws FormValidation {
         endPointUrl = Util.fixEmptyAndTrim(endPointUrl);
         identity = Util.fixEmptyAndTrim(identity);
         credential = Util.fixEmptyAndTrim(credential);
+        project = Util.fixEmptyAndTrim(project);
+        domain = Util.fixEmptyAndTrim(domain);
         region = Util.fixEmptyAndTrim(region);
 
-        if (endPointUrl == null || identity == null || credential == null) {
+        if (endPointUrl == null || identity == null || credential == null || project == null || domain == null) {
             throw FormValidation.error("Invalid parameters");
         }
 
-        return new Openstack(endPointUrl, identity, Secret.fromString(credential), region);
+        return new Openstack(endPointUrl, identity, Secret.fromString(credential), project, domain, region);
     }
 
     public @Nonnull List<JCloudsSlaveTemplate> getTemplates() {
@@ -142,6 +149,9 @@ public class JCloudsCloud extends Cloud {
         List<PlannedNode> plannedNodeList = new ArrayList<PlannedNode>();
 
         while (excessWorkload > 0 && !Jenkins.getInstance().isQuietingDown() && !Jenkins.getInstance().isTerminating()) {
+
+            int runningNodes = getRunningNodesCount();
+            int plannedNodes = plannedNodeList.size();
 
             if ((getRunningNodesCount() + plannedNodeList.size()) >= instanceCap) {
                 LOGGER.info("Instance cap reached while adding capacity for label " + ((label != null) ? label.toString() : "null"));
@@ -258,7 +268,7 @@ public class JCloudsCloud extends Cloud {
      */
     @Restricted(DoNotUse.class)
     public @Nonnull Openstack getOpenstack() {
-        return new Openstack(endPointUrl, identity, credential, zone);
+        return new Openstack(endPointUrl, identity, credential, project, domain, zone);
     }
 
     @Extension
@@ -276,10 +286,12 @@ public class JCloudsCloud extends Cloud {
         public FormValidation doTestConnection(@QueryParameter String zone,
                                                @QueryParameter String endPointUrl,
                                                @QueryParameter String identity,
-                                               @QueryParameter String credential
+                                               @QueryParameter String credential,
+                                               @QueryParameter String project,
+                                               @QueryParameter String domain
         ) {
             try {
-                getOpenstack(endPointUrl, identity, credential, zone);
+                getOpenstack(endPointUrl, identity, credential, project, domain, zone);
             } catch (FormValidation ex) {
                 return ex;
             } catch (Exception ex) {
@@ -325,7 +337,15 @@ public class JCloudsCloud extends Cloud {
             if (!value.isEmpty() && !value.startsWith("http")) {
                 return FormValidation.error("The endpoint must be an URL");
             }
-            return FormValidation.ok();
+            return FormValidation.validateRequired(value);
+        }
+
+        public FormValidation doCheckProject(@QueryParameter String value) {
+            return FormValidation.validateRequired(value);
+        }
+
+        public FormValidation doCheckDomain(@QueryParameter String value) {
+            return FormValidation.validateRequired(value);
         }
     }
 }
